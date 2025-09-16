@@ -115,7 +115,6 @@ def v1_backtest_between_dates(req: BacktestRequest):
             'results': backtest_data
         }
     except Exception as e:
-        print(e)
         raise e
 
 @app.post('/v1/model/weights_on_date')
@@ -135,7 +134,6 @@ def v1_get_weights_on_date(req: WeightRequest):
 
 @app.post('/v1/data/pull_between_dates')
 def v1_data_pull_between_dates(req: DataRequest):
-    print(req)
     try:
         # attempt to pull the data
         data: pd.DataFrame = db.fetch_between_dates(
