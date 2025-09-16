@@ -5,9 +5,9 @@ fund strategy seen in ![quant-strats-in-us-equities](https://github.com/haezera/
 
 ### Planned features
 
-- [ ] Table view of factor scores and pricing data, with pricing graphs available
-- [ ] Backtest functionality for given period, with different starting dates and parameters like lookback windows
-- [ ] Given a backtest, an array of metrics, including factor exposures, historical beta, overperformance and more
+- [X] Table view of factor scores and pricing data, with pricing graphs available (semi-completed)
+- [X] Backtest functionality for given period, with different starting dates and parameters like lookback windows
+- [X] Given a backtest, an array of metrics, including factor exposures, historical beta, overperformance and more
 - [ ] Realistic portfolio management simulation with starting capital and the ability to roll forwards and backwards through time,
 to see weight changes, transaction costs and trade list.
 - [ ] Trade list functionality, which stores current portfolio state (given some month) in the database, and given a required rebalance
