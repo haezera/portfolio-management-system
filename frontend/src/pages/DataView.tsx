@@ -18,17 +18,17 @@ function DataView() {
     const [data, setData] = useState<any[]>([]);
 
     const handleFetch = async () => {
-        if (!table) return
+        if (!table) return;
         try {
-        const response = await axios.post("http://localhost:8000/v1/data/pull_between_dates", {
-            table_name: table,
-            start_date: "2020-01-01",
-            end_date: "2020-12-31",
-            tickers: null,
-        })
-        setData(response.data);
+            const response = await axios.post("http://localhost:8000/v1/data/pull_between_dates", {
+                table_name: table,
+                start_date: "2020-01-01",
+                end_date: "2020-12-31",
+                tickers: null,
+            })
+            setData(response.data);
         } catch (err) {
-        console.error("API error:", err)
+            console.error("API error:", err)
         }
     }
 

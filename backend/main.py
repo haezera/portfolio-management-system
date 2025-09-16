@@ -57,7 +57,7 @@ def v1_root():
     }
 
 @app.get('/v1/backtest/analytics/factor_exposure')
-def v1_backtest_beta_exposure(backtest_id: str):
+def v1_backtest_factor_exposure(backtest_id: str):
     if backtest_id not in backtest_cache:
         raise HTTPException(
             status_code=400,
@@ -76,7 +76,7 @@ def v1_backtest_beta_exposure(backtest_id: str):
     return factor_exposures
 
 @app.get('/v1/backtest/analytics/beta_exposure')
-def v1_backtest_beta_exposure(backtest_id: str, window_length: int):
+def v1_backtest_beta_exposure(backtest_id: str):
     if backtest_id not in backtest_cache:
         raise HTTPException(
             status_code=400,
@@ -85,7 +85,7 @@ def v1_backtest_beta_exposure(backtest_id: str, window_length: int):
     
     backtest = backtest_cache[backtest_id]
     try:
-        rolling_beta = backtest.beta_exposures(window_length)
+        rolling_beta = backtest.beta_exposures(12)
     except Exception as e:
         raise HTTPException(
             status_code=400,
@@ -115,6 +115,7 @@ def v1_backtest_between_dates(req: BacktestRequest):
             'results': backtest_data
         }
     except Exception as e:
+        print(e)
         raise e
 
 @app.post('/v1/model/weights_on_date')

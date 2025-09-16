@@ -49,7 +49,7 @@ class BackTest:
                 status_code=400,
                 detail=f"The following factors do not exist in portfolio_data: {missing_factors}"
             )
-
+        print(self.factors)
         # Extract numpy arrays for fast operations
         dates = portfolio_data["date"].to_numpy()
         tickers = portfolio_data["ticker"].to_numpy()
@@ -87,10 +87,9 @@ class BackTest:
 
             # save model coefficients (z-scored)
             zscored_coefs = zscore(alpha_model.coef_)
-            self.model_coefficients.append({
-                'date': months[i],
-                'coefficients': dict(zip(self.factors, zscored_coefs))
-            })
+            model_coeffs = dict(zip(self.factors, zscored_coefs))
+            model_coeffs['date'] = months[i]
+            self.model_coefficients.append(model_coeffs)
 
             # mask for prediction data
             mask_pred = (dates == months[i])
@@ -123,7 +122,11 @@ class BackTest:
                 'passive_return': float(np.dot(passive_weights, returns_pred))
             })
 
-        return self.backtest_results
+        backtest_results = pd.DataFrame(self.backtest_results)
+        backtest_results['cum_portfolio'] = (1 + backtest_results['portfolio_return']).cumprod() - 1
+        backtest_results['cum_passive'] = (1 + backtest_results['passive_return']).cumprod() - 1
+
+        return backtest_results.to_dict(orient='records')
 
     def factor_exposures(self):
         if self.model_coefficients is None:
