@@ -1,15 +1,93 @@
+import axios from "axios";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
+import { useEffect, useState } from "react";
+
+// for charting stuff
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend } from 'recharts';
+import { scaleSequential } from "d3-scale";
+import { interpolateViridis } from "d3-scale-chromatic";
 
 function Home() {
+  const [priceData, setPriceData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const backend = import.meta.env.VITE_BACKEND_API
+  const tickers = ["GOOG", "AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "META"]
+  const colorScale = scaleSequential(interpolateViridis).domain([0, tickers.length - 1]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.post(
+          `${backend}/v1/data/pull_between_dates`,
+          {
+            table_name: "eom_prices",
+            start_date: "2001-01-01",
+            end_date: "2025-08-31",
+            tickers: tickers,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const raw = res.data;
+        const groupedPrice: Record<string, any> = {};
+
+        raw.forEach((row: any) => {
+          if (!groupedPrice[row.date]) {
+            groupedPrice[row.date] = { date: row.date };
+          }
+          groupedPrice[row.date][row.ticker] = row.price;
+        });
+
+        setPriceData(Object.values(groupedPrice));
+      } catch (err: any) {
+        setError(err.message || "Unknown error");
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  console.log(priceData)
+
   return (
     <div>
       <p className="mt-20">Hello, and welcome to the portfolio management system.</p>
       <p>See below for information about what this project does, and how to utilise it.</p>
+      
+      <div className="flex flex-col m-10 justify-center">
+        <LineChart
+          key={Date.now()} // i need this to reanime every time
+          width={600}
+          height={300}
+          data={priceData}
+        >
+          <CartesianGrid />
+          {tickers.map((ticker, idx) => (
+            <Line
+              key={ticker}
+              type="monotone"
+              dot={false}
+              dataKey={ticker}
+              strokeWidth={2}
+              stroke={colorScale(idx)}
+              isAnimationActive={true}
+              animationDuration={2500}
+            />
+          ))}
+          <XAxis dataKey="date" />
+          <YAxis />
+          <Legend />
+        </LineChart>
+      </div>
+
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1" className="pl-3 hover:text-orange-300 rounded">
           <AccordionTrigger className="justify-start">What is this project?</AccordionTrigger>

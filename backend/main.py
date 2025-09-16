@@ -8,6 +8,7 @@ from classes.Requests import DataRequest, WeightRequest, BacktestRequest
 from classes.Responses import ErrorResponse
 from fastapi import Depends, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from collections import defaultdict
 import pandas as pd
 import os
@@ -32,6 +33,16 @@ db_url = os.getenv('DB_URL')
 db = PSQLDataBase(db_url)
 
 app = FastAPI()
+
+# you shouldn't include this for production level
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],   # allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],   # allow all headers
+)
+
 
 @app.get('/')
 def root():
@@ -123,6 +134,7 @@ def v1_get_weights_on_date(req: WeightRequest):
 
 @app.post('/v1/data/pull_between_dates')
 def v1_data_pull_between_dates(req: DataRequest):
+    print(req)
     try:
         # attempt to pull the data
         data: pd.DataFrame = db.fetch_between_dates(
@@ -141,8 +153,10 @@ def v1_data_pull_between_dates(req: DataRequest):
             ).model_dump()
         )
     
+    data = data.sort_values('date')
+    
     # otherwise return the data in json form of records
-    return data.to_json(orient='records')
+    return data.to_dict(orient='records')
 
 
 
